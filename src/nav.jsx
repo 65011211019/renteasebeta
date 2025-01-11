@@ -15,15 +15,24 @@ const Nav = () => {
   }, []);
 
   useEffect(() => {
-    // Prevent scrolling when mobile menu is open
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
 
+    // Handle resize
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('resize', handleResize);
     };
   }, [isMenuOpen]);
 
@@ -102,109 +111,112 @@ const Nav = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div 
-          className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
-            isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          onClick={() => setIsMenuOpen(false)}
-        />
+        {/* Mobile Navigation Overlay */}
+        {isMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsMenuOpen(false)}
+          />
+        )}
         
+        {/* Mobile Navigation Menu */}
         <div
-          className={`absolute top-16 left-0 right-0 bg-gradient-to-b from-purple-900 to-indigo-900 transform transition-transform duration-300 ease-in-out md:hidden ${
+          className={`fixed top-16 left-0 right-0 bottom-0 bg-gradient-to-b from-purple-900 to-indigo-900 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
             isMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
-          style={{ maxHeight: 'calc(100vh - 4rem)', overflowY: 'auto' }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-4 py-3 space-y-3">
-            {loggedInUser && (
-              <div className="flex items-center space-x-3 px-2 py-3 border-b border-white/10">
-                {loggedInUser.user_imgurl ? (
-                  <img
-                    src={loggedInUser.user_imgurl}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full border-2 border-white/20"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                    <User className="w-6 h-6 text-white/70" />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="text-white font-medium">{loggedInUser.user_name || 'ผู้ใช้'}</p>
-                  <p className="text-white/60 text-sm">{loggedInUser.user_email}</p>
-                </div>
-              </div>
-            )}
-
-            <MobileNavLink to="/" onClick={() => setIsMenuOpen(false)}>
-              หน้าแรก
-            </MobileNavLink>
-            <MobileNavLink to="/product" onClick={() => setIsMenuOpen(false)}>
-              สินค้า
-            </MobileNavLink>
-            
-            {loggedInUser ? (
-              <>
-                <MobileNavLink to="/cart" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>ตะกร้า</span>
+          <div className="h-full overflow-y-auto">
+            <div className="px-4 py-3 space-y-3">
+              {loggedInUser && (
+                <div className="flex items-center space-x-3 px-2 py-3 border-b border-white/10">
+                  {loggedInUser.user_imgurl ? (
+                    <img
+                      src={loggedInUser.user_imgurl}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full border-2 border-white/20"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                      <User className="w-6 h-6 text-white/70" />
                     </div>
-                    {loggedInUser.cart?.itemCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                        {loggedInUser.cart.itemCount}
-                      </span>
-                    )}
+                  )}
+                  <div className="flex-1">
+                    <p className="text-white font-medium">{loggedInUser.user_name || 'ผู้ใช้'}</p>
+                    <p className="text-white/60 text-sm">{loggedInUser.user_email}</p>
                   </div>
-                </MobileNavLink>
-                
-                <div className="h-px bg-white/10 my-3" />
-                
-                <MobileNavLink to="/manage-profile" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center space-x-3">
-                    <User className="w-5 h-5" />
-                    <span>จัดการโปรไฟล์</span>
-                  </div>
-                </MobileNavLink>
-                <MobileNavLink to="/manage-rentals" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center space-x-3">
-                    <Package className="w-5 h-5" />
-                    <span>จัดการการให้เช่า</span>
-                  </div>
-                </MobileNavLink>
-                <MobileNavLink to="/track-rental" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center space-x-3">
-                    <Settings className="w-5 h-5" />
-                    <span>ติดตามสถานะการเช่า</span>
-                  </div>
-                </MobileNavLink>
-                
-                <div className="h-px bg-white/10 my-3" />
-                
-                <button
-                  className="w-full flex items-center space-x-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition duration-200"
-                  onClick={handleLogout}
+                </div>
+              )}
+
+              <MobileNavLink to="/" onClick={() => setIsMenuOpen(false)}>
+                หน้าแรก
+              </MobileNavLink>
+              <MobileNavLink to="/product" onClick={() => setIsMenuOpen(false)}>
+                สินค้า
+              </MobileNavLink>
+              
+              {loggedInUser ? (
+                <>
+                  <MobileNavLink to="/cart" onClick={() => setIsMenuOpen(false)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <ShoppingCart className="w-5 h-5" />
+                        <span>ตะกร้า</span>
+                      </div>
+                      {loggedInUser.cart?.itemCount > 0 && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          {loggedInUser.cart.itemCount}
+                        </span>
+                      )}
+                    </div>
+                  </MobileNavLink>
+                  
+                  <div className="h-px bg-white/10 my-3" />
+                  
+                  <MobileNavLink to="/manage-profile" onClick={() => setIsMenuOpen(false)}>
+                    <div className="flex items-center space-x-3">
+                      <User className="w-5 h-5" />
+                      <span>จัดการโปรไฟล์</span>
+                    </div>
+                  </MobileNavLink>
+                  <MobileNavLink to="/manage-rentals" onClick={() => setIsMenuOpen(false)}>
+                    <div className="flex items-center space-x-3">
+                      <Package className="w-5 h-5" />
+                      <span>จัดการการให้เช่า</span>
+                    </div>
+                  </MobileNavLink>
+                  <MobileNavLink to="/track-rental" onClick={() => setIsMenuOpen(false)}>
+                    <div className="flex items-center space-x-3">
+                      <Settings className="w-5 h-5" />
+                      <span>ติดตามสถานะการเช่า</span>
+                    </div>
+                  </MobileNavLink>
+                  
+                  <div className="h-px bg-white/10 my-3" />
+                  
+                  <button
+                    className="w-full flex items-center space-x-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition duration-200"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>ออกจากระบบ</span>
+                  </button>
+                </>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="block w-full text-center bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg transition duration-200"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  <LogOut className="w-5 h-5" />
-                  <span>ออกจากระบบ</span>
-                </button>
-              </>
-            ) : (
-              <Link 
-                to="/login" 
-                className="block w-full text-center bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg transition duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                เข้าสู่ระบบ
-              </Link>
-            )}
+                  เข้าสู่ระบบ
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Spacer to prevent content from going under fixed navbar */}
+      {/* Spacer */}
       <div className="h-16" />
     </div>
   );
@@ -229,7 +241,7 @@ const MobileNavLink = ({ to, onClick, children }) => (
   </Link>
 );
 
-const CartButton = ({ itemCount }) => (
+const CartButton = ({ itemCount = 0 }) => (
   <Link
     to="/cart"
     className="relative group"
