@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ShoppingCart, ChevronDown, User, Package, Settings, LogOut } from "lucide-react";
+import { Menu, X, ShoppingCart, ChevronDown, User, Package, Settings, LogOut, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";  // Make sure this line is present at the top
+
 
 const Nav = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();  // Initialize navigate
 
   useEffect(() => {
     const savedUser = localStorage.getItem("loggedInUser");
@@ -53,8 +56,10 @@ const Nav = () => {
     setLoggedInUser(null);
     setIsMenuOpen(false);
     localStorage.removeItem("loggedInUser");
-    window.location.reload();
+    window.location.reload(); // Optionally reload the page if you want to reset other states
+    navigate('/'); // Redirect to homepage using the navigate function
   };
+  
 
   return (
     <div className="relative">
